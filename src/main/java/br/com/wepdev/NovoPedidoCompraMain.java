@@ -1,5 +1,6 @@
 package br.com.wepdev;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -20,13 +21,17 @@ public class NovoPedidoCompraMain
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
         String valor = "12123,92313, 5656"; // valores passados pelo produtor
         ProducerRecord<String, String> record = new ProducerRecord("ECOMMERCE_LOJA_NOVO_PEDIDO", valor, valor); //Enviando a msg para o tipico ECOMMERCE_LOJA_NOVO_PEDIDO
-        producer.send(record, (dados, ex) -> { // Ao enviar a msg com o SEND, estou pegando o retorno desse envio
-            if(ex != null){ // se acontecer a exception o erro sera exibido
+        Callback callback = (dados, ex) -> { // Ao enviar a msg com o SEND, estou pegando o retorno desse envio
+            if (ex != null) { // se acontecer a exception o erro sera exibido
                 ex.printStackTrace();
                 return;
             }
             System.out.println("Sucesso enviando nesse topico " + dados.topic() + ":::particao " + dados.partition() + "/ offset " + dados.offset() + "/ timestamp " + dados.timestamp());
-        }).get();
+        };
+        String email = "Obrigado pelo seu pedido, ele esta sendo processado";
+        ProducerRecord<String, String> emailRecord = new ProducerRecord("ECOMMERCE_ENVIAR_EMAIL", email, email);
+        producer.send(record, callback).get();
+        producer.send(emailRecord, callback).get();
     }
 
     /**
