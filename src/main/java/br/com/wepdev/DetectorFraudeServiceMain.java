@@ -54,6 +54,7 @@ public class DetectorFraudeServiceMain {
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()); // Valor serializador de String
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, DetectorFraudeServiceMain.class.getSimpleName()); //Criando grupo e colocando o nome da propria classe
         properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, DetectorFraudeServiceMain.class.getSimpleName() + "-" + UUID.randomUUID().toString()); //Dando um nome para esse consumer
+        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1"); //Config dos commits das mensagens de 1 em 1 para evitar erros
 
         return properties;
     }
