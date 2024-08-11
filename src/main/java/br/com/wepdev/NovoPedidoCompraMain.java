@@ -8,6 +8,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -19,8 +20,11 @@ public class NovoPedidoCompraMain
     public static void main( String[] args ) throws ExecutionException, InterruptedException {
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
-        String valor = "12123,92313, 5656"; // valores passados pelo produtor
-        ProducerRecord<String, String> record = new ProducerRecord("ECOMMERCE_LOJA_NOVO_PEDIDO", valor, valor); //Enviando a msg para o tipico ECOMMERCE_LOJA_NOVO_PEDIDO
+
+        String key = UUID.randomUUID().toString(); // Simulando o ID de um usuario
+        String valor = key + "12123,92313, 5656"; // valores passados pelo produtor
+
+        ProducerRecord<String, String> record = new ProducerRecord("ECOMMERCE_LOJA_NOVO_PEDIDO", key, valor); //Enviando a msg para o tipico ECOMMERCE_LOJA_NOVO_PEDIDO
         Callback callback = (dados, ex) -> { // Ao enviar a msg com o SEND, estou pegando o retorno desse envio
             if (ex != null) { // se acontecer a exception o erro sera exibido
                 ex.printStackTrace();
@@ -29,7 +33,7 @@ public class NovoPedidoCompraMain
             System.out.println("Sucesso enviando nesse topico " + dados.topic() + ":::particao " + dados.partition() + "/ offset " + dados.offset() + "/ timestamp " + dados.timestamp());
         };
         String email = "Obrigado pelo seu pedido, ele esta sendo processado";
-        ProducerRecord<String, String> emailRecord = new ProducerRecord("ECOMMERCE_ENVIAR_EMAIL", email, email);
+        ProducerRecord<String, String> emailRecord = new ProducerRecord("ECOMMERCE_ENVIAR_EMAIL", key, email);
         producer.send(record, callback).get();
         producer.send(emailRecord, callback).get();
     }
