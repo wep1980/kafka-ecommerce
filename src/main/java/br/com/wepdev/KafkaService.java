@@ -11,11 +11,11 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
-public class KafkaService implements Closeable {
+public class KafkaService<T> implements Closeable {
 
-    private final KafkaConsumer consumer;
-
+    private final KafkaConsumer<String, T> consumer;
     private final ConsumerFunction parse;
 
     /**
@@ -24,22 +24,32 @@ public class KafkaService implements Closeable {
      * @param topic  passa o topico que sera consumido
      * @param parse funcao parse
      */
-    public KafkaService(String nomeGrupoID, String topic, ConsumerFunction parse){
+    public KafkaService(String nomeGrupoID, String topic, ConsumerFunction parse, Class<T> type){
         this.parse = parse;
-        this.consumer = new KafkaConsumer<>(properties(nomeGrupoID));
+        this.consumer = new KafkaConsumer<>(properties(type, nomeGrupoID));
         consumer.subscribe(Collections.singletonList(topic));
+    }
 
+
+    /**
+     * Contrutor 2 que recebe um pattern para atender ao logservicemain
+     * @param nomeGrupoID
+     * @param topic
+     * @param parse
+     */
+    public KafkaService(String nomeGrupoID, Pattern topic, ConsumerFunction parse, Class<T> type){
+        this.parse = parse;
+        this.consumer = new KafkaConsumer<>(properties(type, nomeGrupoID));
+        consumer.subscribe(topic);
 
     }
 
     public void run() {
         while (true) {
-
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(200));
-
+            ConsumerRecords<String, T> records = consumer.poll(Duration.ofMillis(200));
             if (!records.isEmpty()) {
                 System.out.println("Encontrei " + records.count() +  " registros");
-                for (ConsumerRecord<String, String> record : records) {
+                for (ConsumerRecord<String, T> record : records) {
                     parse.consume(record);
                 }
             }
@@ -50,13 +60,14 @@ public class KafkaService implements Closeable {
      * Metodo de configuracao do consumidor
      * @return
      */
-    private static Properties properties(String nomeGrupoID) {
+    private Properties properties(Class<T> type, String nomeGrupoID) {
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); // Local de configuracao
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()); // Chave serializadora de String
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()); // Valor serializador de String
+        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GsonDeserialized.class.getName()); // Valor serializador de String
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, nomeGrupoID); //Criando grupo e recebendo um nome para ele
         properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString()); //Criando um ID generico
+        properties.setProperty(GsonDeserialized.TYPE_CONFIG, type.getName()); // configuracao de propriedade que deserializa qualquer tipo de classe
 
         return properties;
     }

@@ -12,7 +12,7 @@ public class NovoPedidoCompraMain {
     public static void main( String[] args ) throws ExecutionException, InterruptedException {
 
         try(KafkaDispatcher compraDispatcher = new KafkaDispatcher<Compra>()) { // qualquer exception que aconteça aqui dentro, existira uma tentativa de fechar esse producer
-            try (KafkaDispatcher emailDispatcher = new KafkaDispatcher<String>()) {
+            try (KafkaDispatcher emailDispatcher = new KafkaDispatcher<Email>()) {
 
 
                 for (int i = 0; i < 10; i++) {

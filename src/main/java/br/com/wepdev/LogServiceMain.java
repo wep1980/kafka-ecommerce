@@ -15,38 +15,28 @@ public class LogServiceMain {
 
     public static void main(String[] args) {
 
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties());
-            consumer.subscribe(Pattern.compile("ECOMMERCE.*")); // Esse consumer, consome os dados de todos os topicos que comecem com ECOMMERCE
+        LogServiceMain logServiceMain = new LogServiceMain();
 
-            while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(200));
+        try (KafkaService service = new KafkaService(
+                LogServiceMain.class.getSimpleName(), // passando o nome do grupo no qual esse consumer pertence
+                Pattern.compile("ECOMMERCE.*"), // passando o topico de consumo, todos que tiverem ecommerce na frente
+                logServiceMain::parse,
+                String.class)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
 
-                if (!records.isEmpty()) {
-                    System.out.println("Encontrei " + records.count() +  " registros");
-                    for (ConsumerRecord<String, String> record : records) {
-                        System.out.println("--------------------------------------------------------------------");
-                        System.out.println("LOG: " + record.topic());
-                        System.out.println(record.key());
-                        System.out.println(record.value());
-                        System.out.println(record.partition());
-                        System.out.println(record.offset());
-                    }
-                }
-            }
+            service.run();
+        }
     }
 
-    /**
-     * Metodo de configuracao do consumidor
-     * @return
-     */
-    private static Properties properties() {
-        Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); // Local de configuracao
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()); // Chave serializadora de String
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()); // Valor serializador de String
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, LogServiceMain.class.getSimpleName()); //Criando grupo e colocando o nome da propria classe
+    private void parse(ConsumerRecord<String, String> record) {
 
-        return properties;
+        System.out.println("--------------------------------------------------------------------");
+        System.out.println("LOG: " + record.topic());
+        System.out.println(record.key());
+        System.out.println(record.value());
+        System.out.println(record.partition());
+        System.out.println(record.offset());
+
     }
+
 
 }

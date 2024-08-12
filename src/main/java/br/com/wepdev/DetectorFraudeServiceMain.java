@@ -9,16 +9,17 @@ public class DetectorFraudeServiceMain {
 
         DetectorFraudeServiceMain detectorFraudeServiceMain = new DetectorFraudeServiceMain();
 
-        try(KafkaService kafkaService = new KafkaService(
+        try(KafkaService<Compra> kafkaService = new KafkaService<>(
                 DetectorFraudeServiceMain.class.getSimpleName(), // passando o nome do grupo no qual esse consumer pertence
                 "ECOMMERCE_LOJA_NOVO_PEDIDO", // passando o topico de consumo
-                detectorFraudeServiceMain::parse)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
+                detectorFraudeServiceMain::parse,
+                Compra.class)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
 
             kafkaService.run();
         }
     }
 
-    private void parse(ConsumerRecord<String, String> record) {
+    private void parse(ConsumerRecord<String, Compra> record) {
         System.out.println("--------------------------------------------------------------------");
         System.out.println("Processando novos pedidos, checando fraudes ");
         System.out.println(record.key());

@@ -11,7 +11,8 @@ public class EmailServiceMain {
        try(KafkaService service = new KafkaService(
                 EmailServiceMain.class.getSimpleName(), // passando o nome do grupo no qual esse consumer pertence
                 "ECOMMERCE_LOJA_NOVO_PEDIDO", // passando o topico de consumo
-                emailServiceMain::parse)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
+                emailServiceMain::parse,
+                String.class)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
 
            service.run();
        }
