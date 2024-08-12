@@ -1,9 +1,6 @@
 package br.com.wepdev;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-
-import java.util.Properties;
 
 
 public class DetectorFraudeServiceMain {
@@ -12,13 +9,13 @@ public class DetectorFraudeServiceMain {
 
         DetectorFraudeServiceMain detectorFraudeServiceMain = new DetectorFraudeServiceMain();
 
-        KafkaService kafkaService = new KafkaService(
-                DetectorFraudeServiceMain.class.getSimpleName(),
-                "ECOMMERCE_LOJA_NOVO_PEDIDO",
-                detectorFraudeServiceMain::parse);
+        try(KafkaService kafkaService = new KafkaService(
+                DetectorFraudeServiceMain.class.getSimpleName(), // passando o nome do grupo no qual esse consumer pertence
+                "ECOMMERCE_LOJA_NOVO_PEDIDO", // passando o topico de consumo
+                detectorFraudeServiceMain::parse)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
 
-        kafkaService.run();
-
+            kafkaService.run();
+        }
     }
 
     private void parse(ConsumerRecord<String, String> record) {
@@ -36,19 +33,5 @@ public class DetectorFraudeServiceMain {
         System.out.println("Pedido processado com sucesso!!!");
     }
 
-
-
-
-    /**
-     * Metodo de configuracao do consumidor
-     * @return
-     */
-    private static Properties properties() {
-        Properties properties = new Properties();
-
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, DetectorFraudeServiceMain.class.getSimpleName());
-
-        return properties;
-    }
 
 }

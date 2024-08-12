@@ -8,14 +8,21 @@ public class EmailServiceMain {
 
         EmailServiceMain emailServiceMain = new EmailServiceMain();
 
-        KafkaService service = new KafkaService(
-                "ECOMMERCE_ENVIAR_EMAIL",
-                "ECOMMERCE_LOJA_NOVO_PEDIDO",
-                emailServiceMain::parse);
+       try(KafkaService service = new KafkaService(
+                EmailServiceMain.class.getSimpleName(), // passando o nome do grupo no qual esse consumer pertence
+                "ECOMMERCE_LOJA_NOVO_PEDIDO", // passando o topico de consumo
+                emailServiceMain::parse)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
 
-        service.run();
+           service.run();
+       }
 
     }
+
+        /**
+         * Funcao executada para cada mensagem recebida.
+         * Esse metodo poderia ser static, ao inves de uma funcao
+         * @param record
+         */
         private void parse (ConsumerRecord<String,String > record){
             System.out.println("--------------------------------------------------------------------");
             System.out.println("Enviando email ");
