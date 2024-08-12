@@ -2,46 +2,42 @@ package br.com.wepdev;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 
-import java.time.Duration;
-import java.util.Collections;
 import java.util.Properties;
-import java.util.UUID;
+
 
 public class DetectorFraudeServiceMain {
 
     public static void main(String[] args) {
 
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties());
-            consumer.subscribe(Collections.singletonList("ECOMMERCE_LOJA_NOVO_PEDIDO")); // Esse consumer , consome os dados do topico ECOMMERCE_LOJA_NOVO_PEDIDO
+        DetectorFraudeServiceMain detectorFraudeServiceMain = new DetectorFraudeServiceMain();
 
-            while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(200));
+        KafkaService kafkaService = new KafkaService(
+                DetectorFraudeServiceMain.class.getSimpleName(),
+                "ECOMMERCE_LOJA_NOVO_PEDIDO",
+                detectorFraudeServiceMain::parse);
 
-                if (!records.isEmpty()) {
-                    System.out.println("Encontrei " + records.count() +  " registros");
-                    for (ConsumerRecord<String, String> record : records) {
-                        System.out.println("--------------------------------------------------------------------");
-                        System.out.println("Processando novos pedidos, checando fraudes ");
-                        System.out.println(record.key());
-                        System.out.println(record.value());
-                        System.out.println(record.partition());
-                        System.out.println(record.offset());
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        System.out.println("Pedido processado com sucesso!!!");
-                    }
-                }
-            }
+        kafkaService.run();
+
     }
+
+    private void parse(ConsumerRecord<String, String> record) {
+        System.out.println("--------------------------------------------------------------------");
+        System.out.println("Processando novos pedidos, checando fraudes ");
+        System.out.println(record.key());
+        System.out.println(record.value());
+        System.out.println(record.partition());
+        System.out.println(record.offset());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Pedido processado com sucesso!!!");
+    }
+
+
+
 
     /**
      * Metodo de configuracao do consumidor
@@ -49,12 +45,8 @@ public class DetectorFraudeServiceMain {
      */
     private static Properties properties() {
         Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); // Local de configuracao
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()); // Chave serializadora de String
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()); // Valor serializador de String
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, DetectorFraudeServiceMain.class.getSimpleName()); //Criando grupo e colocando o nome da propria classe
-        properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, DetectorFraudeServiceMain.class.getSimpleName() + "-" + UUID.randomUUID().toString()); //Dando um nome para esse consumer
-        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1"); //Config dos commits das mensagens de 1 em 1 para evitar erros
+
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, DetectorFraudeServiceMain.class.getSimpleName());
 
         return properties;
     }

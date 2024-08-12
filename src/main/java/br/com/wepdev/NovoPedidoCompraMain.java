@@ -21,21 +21,24 @@ public class NovoPedidoCompraMain
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
 
-        String key = UUID.randomUUID().toString(); // Simulando o ID de um usuario
-        String valor = key + "12123,92313, 5656"; // valores passados pelo produtor
+        for(int i = 0; i < 10; i++) {
 
-        ProducerRecord<String, String> record = new ProducerRecord("ECOMMERCE_LOJA_NOVO_PEDIDO", key, valor); //Enviando a msg para o tipico ECOMMERCE_LOJA_NOVO_PEDIDO
-        Callback callback = (dados, ex) -> { // Ao enviar a msg com o SEND, estou pegando o retorno desse envio
-            if (ex != null) { // se acontecer a exception o erro sera exibido
-                ex.printStackTrace();
-                return;
-            }
-            System.out.println("Sucesso enviando nesse topico " + dados.topic() + ":::particao " + dados.partition() + "/ offset " + dados.offset() + "/ timestamp " + dados.timestamp());
-        };
-        String email = "Obrigado pelo seu pedido, ele esta sendo processado";
-        ProducerRecord<String, String> emailRecord = new ProducerRecord("ECOMMERCE_ENVIAR_EMAIL", key, email);
-        producer.send(record, callback).get();
-        producer.send(emailRecord, callback).get();
+            String key = UUID.randomUUID().toString(); // Simulando o ID de um usuario
+            String valor = key + "12123,92313, 5656"; // valores passados pelo produtor
+
+            ProducerRecord<String, String> record = new ProducerRecord("ECOMMERCE_LOJA_NOVO_PEDIDO", key, valor); //Enviando a msg para o tipico ECOMMERCE_LOJA_NOVO_PEDIDO
+            Callback callback = (dados, ex) -> { // Ao enviar a msg com o SEND, estou pegando o retorno desse envio
+                if (ex != null) { // se acontecer a exception o erro sera exibido
+                    ex.printStackTrace();
+                    return;
+                }
+                System.out.println("Sucesso enviando nesse topico " + dados.topic() + ":::particao " + dados.partition() + "/ offset " + dados.offset() + "/ timestamp " + dados.timestamp());
+            };
+            String email = "Obrigado pelo seu pedido, ele esta sendo processado";
+            ProducerRecord<String, String> emailRecord = new ProducerRecord("ECOMMERCE_ENVIAR_EMAIL", key, email);
+            producer.send(record, callback).get();
+            producer.send(emailRecord, callback).get();
+        }
     }
 
     /**
