@@ -10,10 +10,10 @@ import java.io.Closeable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-public class KafkaDispatcher implements Closeable {
+public class KafkaDispatcher<T> implements Closeable {
 
 
-    private final KafkaProducer<String, String> producer;
+    private final KafkaProducer<String, T> producer;
 
     /**
      * Construtor
@@ -23,9 +23,9 @@ public class KafkaDispatcher implements Closeable {
     }
 
 
-    public void send(String topic, String key, String valor) throws ExecutionException, InterruptedException {
+    public void send(String topic, String key, T valor) throws ExecutionException, InterruptedException {
 
-        ProducerRecord<String, String> record = new ProducerRecord(topic, key, valor); //Enviando a msg para o tipico ECOMMERCE_LOJA_NOVO_PEDIDO
+        ProducerRecord<String, T> record = new ProducerRecord<>(topic, key, valor); //Enviando a msg para o tipico ECOMMERCE_LOJA_NOVO_PEDIDO
         Callback callback = (dados, ex) -> { // Ao enviar a msg com o SEND, estou pegando o retorno desse envio
             if (ex != null) { // se acontecer a exception o erro sera exibido
                 ex.printStackTrace();
@@ -44,7 +44,7 @@ public class KafkaDispatcher implements Closeable {
         Properties properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); // Local de configuracao
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()); // Chave serializadora de String
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName()); // Valor serializador de String
+        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName()); // Valor serializador de String
 
         return properties;
     }
