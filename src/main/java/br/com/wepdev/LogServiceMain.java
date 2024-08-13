@@ -2,13 +2,11 @@ package br.com.wepdev;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Properties;
+
+import java.util.Map;
+
 import java.util.regex.Pattern;
 
 public class LogServiceMain {
@@ -21,7 +19,13 @@ public class LogServiceMain {
                 LogServiceMain.class.getSimpleName(), // passando o nome do grupo no qual esse consumer pertence
                 Pattern.compile("ECOMMERCE.*"), // passando o topico de consumo, todos que tiverem ecommerce na frente
                 logServiceMain::parse,
-                String.class)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
+                String.class,
+                /*
+                Tem momentos que a gente não sabe o que esta vindo no producer, isso e raro de acontecer,
+                somente quando não existe um padrão para a mensagem, então e preciso utilizar um deserialized compativel,
+                o Map abaixo serve para passar propriedades extras de configuracão do kafka
+                 */
+                Map.of(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()))) {
 
             service.run();
         }

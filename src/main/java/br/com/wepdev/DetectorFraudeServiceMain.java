@@ -2,6 +2,9 @@ package br.com.wepdev;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class DetectorFraudeServiceMain {
 
@@ -13,7 +16,8 @@ public class DetectorFraudeServiceMain {
                 DetectorFraudeServiceMain.class.getSimpleName(), // passando o nome do grupo no qual esse consumer pertence
                 "ECOMMERCE_LOJA_NOVO_PEDIDO", // passando o topico de consumo
                 detectorFraudeServiceMain::parse,
-                Compra.class)) { // (Method reference -> passando uma referencia para a função) Função executada para cada mensagem recebida
+                Compra.class,
+                Map.of())) { // Passando um Map.of() vazio, pois esse service não recebe configuracoes de properties customizadas
 
             kafkaService.run();
         }
