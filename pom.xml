@@ -17,7 +17,16 @@
             </plugin>
         </plugins>
     </build>
-    <packaging>jar</packaging>
+
+    <modules>
+        <module>servive_email</module>
+        <module>service-detector-fraude</module>
+        <module>service-log</module>
+        <module>service-novo-pedido</module>
+        <module>common-kafka</module>
+    </modules>
+
+    <packaging>pom</packaging>
 
   <name>ecommerce</name>
   <url>http://maven.apache.org</url>
